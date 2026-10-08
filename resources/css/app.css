@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+    --color-del-purple: #4C1D95;
+    --color-del-purple-hover: #3B0764;
+}
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
