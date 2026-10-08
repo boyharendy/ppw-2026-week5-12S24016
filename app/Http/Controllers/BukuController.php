@@ -10,7 +10,7 @@ class BukuController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Buku::query();
+        $query = Buku::with('kategori');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -57,7 +57,7 @@ class BukuController extends Controller
 
     public function show(Buku $buku)
     {
-        // $buku->load('kategori');
+        $buku->load('kategori');
         return view('buku.show', compact('buku'));
     }
 
