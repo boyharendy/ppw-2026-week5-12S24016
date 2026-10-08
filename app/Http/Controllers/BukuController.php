@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Buku;
+use App\Models\Kategori;
+use Illuminate\Http\Request;
+
+class BukuController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = Buku::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('penulis', 'like', "%{$search}%")
+                  ->orWhere('isbn', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        $bukus = $query->paginate(10)->withQueryString();
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
+
+        return view('buku.index', compact('bukus', 'kategoris'));
+    }
+
+    public function create()
+    {
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
+        return view('buku.create', compact('kategoris'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'isbn' => 'required|string|size:13|unique:bukus',
+            'judul' => 'required|string|min:5|max:200',
+            'penulis' => 'required|string|max:150',
+            'penerbit' => 'required|string|max:100',
+            'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
+            'kategori_id' => 'required|exists:kategoris,id',
+            'stok' => 'required|integer|min:0',
+            'sinopsis' => 'nullable|string|max:2000',
+        ]);
+
+        Buku::create($validated);
+
+        return redirect()->route('buku.index')->with('success', 'Buku berhasil ditambahkan.');
+    }
+
+    public function show(Buku $buku)
+    {
+        // $buku->load('kategori');
+        return view('buku.show', compact('buku'));
+    }
+
+    public function edit(Buku $buku)
+    {
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
+        return view('buku.edit', compact('buku', 'kategoris'));
+    }
+
+    public function update(Request $request, Buku $buku)
+    {
+        $validated = $request->validate([
+            'isbn' => 'required|string|size:13|unique:bukus,isbn,' . $buku->id,
+            'judul' => 'required|string|min:5|max:200',
+            'penulis' => 'required|string|max:150',
+            'penerbit' => 'required|string|max:100',
+            'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
+            'kategori_id' => 'required|exists:kategoris,id',
+            'stok' => 'required|integer|min:0',
+            'sinopsis' => 'nullable|string|max:2000',
+        ]);
+
+        $buku->update($validated);
+
+        return redirect()->route('buku.index')->with('success', 'Buku berhasil diperbarui.');
+    }
+
+    public function destroy(Buku $buku)
+    {
+        $buku->delete();
+
+        return redirect()->route('buku.index')->with('success', 'Buku berhasil dihapus.');
+    }
+}
