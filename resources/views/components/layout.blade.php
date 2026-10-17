@@ -17,7 +17,30 @@
                     <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
                         <a href="{{ route('buku.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('buku.*') ? 'border-del-purple text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} text-sm font-medium">Buku</a>
                         <a href="{{ route('kategori.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('kategori.*') ? 'border-del-purple text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} text-sm font-medium">Kategori</a>
+                        <a href="{{ route('peminjaman.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('peminjaman.*') ? 'border-del-purple text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} text-sm font-medium">Peminjaman</a>
                     </div>
+                </div>
+
+                <!-- Bagian Autentikasi Sesi & Cookie DevTools -->
+                <div class="flex items-center space-x-4">
+                    @auth
+                        <div class="text-right hidden sm:block">
+                            <span class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</span>
+                            @if(session('login_timestamp'))
+                                <span class="block text-xs text-gray-500">Sesi: {{ session('login_timestamp') }}</span>
+                            @endif
+                        </div>
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50 focus:outline-none">
+                                Keluar
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="inline-flex items-center px-3.5 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-del-purple hover:bg-del-purple-hover">
+                            Login Pustakawan
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>

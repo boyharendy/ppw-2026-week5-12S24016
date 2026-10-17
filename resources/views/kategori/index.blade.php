@@ -5,7 +5,9 @@
             <p class="mt-2 text-sm text-gray-700">Daftar semua kategori buku di perpustakaan.</p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <a href="{{ route('kategori.create') }}" class="inline-flex items-center justify-center rounded border border-transparent bg-del-purple px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-del-purple-hover">Tambah Kategori</a>
+            @auth
+                <a href="{{ route('kategori.create') }}" class="inline-flex items-center justify-center rounded border border-transparent bg-del-purple px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-del-purple-hover">Tambah Kategori</a>
+            @endauth
         </div>
     </div>
     <div class="mt-8 flex flex-col">
@@ -32,12 +34,15 @@
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $kat->bukus_count }}</td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                        <a href="{{ route('kategori.edit', $kat) }}" class="text-del-purple hover:text-del-purple-hover">Ubah</a>
-                                        <form action="{{ route('kategori.destroy', $kat) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                        </form>
+                                        <a href="{{ route('kategori.show', $kat) }}" class="text-del-purple hover:text-del-purple-hover mr-2">Detail</a>
+                                        @auth
+                                            <a href="{{ route('kategori.edit', $kat) }}" class="text-del-purple hover:text-del-purple-hover mr-2">Ubah</a>
+                                            <form action="{{ route('kategori.destroy', $kat) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                            </form>
+                                        @endauth
                                     </td>
                                 </tr>
                             @empty
