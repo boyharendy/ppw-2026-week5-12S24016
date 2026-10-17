@@ -5,10 +5,39 @@
             <p class="mt-2 text-sm text-gray-700">Daftar semua koleksi buku perpustakaan.</p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-            <a href="{{ route('buku.create') }}" class="inline-flex items-center justify-center rounded border border-transparent bg-del-purple px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-del-purple-hover">Tambah Buku</a>
+            @auth
+                <a href="{{ route('buku.create') }}" class="inline-flex items-center justify-center rounded border border-transparent bg-del-purple px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-del-purple-hover">
+                    Tambah Buku
+                </a>
+            @else
+                <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                    Login Pustakawan
+                </a>
+            @endauth
         </div>
     </div>
     
+    <!-- Kartu Statistik Perpustakaan (Query Builder DB::table) -->
+    <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200 p-5">
+            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Judul Buku</dt>
+            <dd class="mt-2 text-2xl font-bold text-gray-900">{{ number_format($stats['total_judul']) }}</dd>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200 p-5">
+            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Stok Tersedia</dt>
+            <dd class="mt-2 text-2xl font-bold text-del-purple">{{ number_format($stats['total_stok']) }}</dd>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200 p-5">
+            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Buku Sedang Dipinjam</dt>
+            <dd class="mt-2 text-2xl font-bold text-yellow-600">{{ number_format($stats['total_dipinjam']) }}</dd>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200 p-5">
+            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Buku Dikembalikan</dt>
+            <dd class="mt-2 text-2xl font-bold text-green-600">{{ number_format($stats['total_kembali']) }}</dd>
+        </div>
+    </div>
+
+    <!-- Filter & Pencarian Dinamis -->
     <div class="mt-6 mb-4">
         <form action="{{ route('buku.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4">
             <div class="w-full sm:w-1/3">
@@ -33,6 +62,7 @@
         </form>
     </div>
 
+    <!-- Tabel Buku -->
     <div class="mt-4 flex flex-col">
         <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -40,21 +70,25 @@
                     <table class="min-w-full divide-y divide-gray-300">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ISBN</th>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Total Pinjam</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ISBN</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Judul</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Penulis</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Kategori</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tahun</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                    <span class="sr-only">Aksi</span>
-                                </th>
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6 text-right text-sm font-semibold text-gray-900">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
                             @forelse($bukus as $buku)
                                 <tr>
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">{{ $buku->isbn }}</td>
+                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-600 font-medium sm:pl-6">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-50 text-del-purple border border-purple-200">
+                                            {{ $buku->peminjamans_count }}x
+                                        </span>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 font-mono">{{ $buku->isbn }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                                         <a href="{{ route('buku.show', $buku) }}" class="text-del-purple hover:text-del-purple-hover">{{ $buku->judul }}</a>
                                     </td>
@@ -63,23 +97,33 @@
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ $buku->tahun_terbit }}</td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                         @if($buku->status_stok == 'Tersedia')
-                                            <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">Tersedia</span>
+                                            <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                                                Tersedia ({{ $buku->stok }})
+                                            </span>
                                         @else
-                                            <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">Habis</span>
+                                            <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
+                                                Habis (0)
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                        <a href="{{ route('buku.edit', $buku) }}" class="text-del-purple hover:text-del-purple-hover">Ubah</a>
-                                        <form action="{{ route('buku.destroy', $buku) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Apakah Anda yakin ingin menghapus buku ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                        </form>
+                                        <a href="{{ route('buku.show', $buku) }}" class="text-del-purple hover:text-del-purple-hover mr-2">Detail</a>
+                                        @auth
+                                            @if($buku->stok > 0)
+                                                <a href="{{ route('peminjaman.create', ['buku_id' => $buku->id]) }}" class="text-green-600 hover:text-green-900 mr-2 font-semibold">Pinjam</a>
+                                            @endif
+                                            <a href="{{ route('buku.edit', $buku) }}" class="text-del-purple hover:text-del-purple-hover mr-2">Ubah</a>
+                                            <form action="{{ route('buku.destroy', $buku) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus buku ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                            </form>
+                                        @endauth
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="py-4 text-center text-sm text-gray-500">Tidak ada data. <a href="{{ route('buku.create') }}" class="text-del-purple hover:underline">Tambah buku pertama</a>.</td>
+                                    <td colspan="8" class="py-8 text-center text-sm text-gray-500">Tidak ada data buku.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -88,6 +132,7 @@
             </div>
         </div>
     </div>
+
     <div class="mt-4">
         {{ $bukus->links() }}
     </div>
