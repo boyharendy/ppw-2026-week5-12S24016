@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuthTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -9,5 +10,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
-    // API v1 routes will be registered here
+    // =========================================================================
+    // 1. ENDPOINT PUBLIK
+    // =========================================================================
+    Route::post('/auth/login', [AuthTokenController::class, 'login']);
+
+    // =========================================================================
+    // 2. ENDPOINT TERPROTEKSI STATELESS BEARER TOKEN (auth:sanctum)
+    // =========================================================================
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/auth/me', [AuthTokenController::class, 'me']);
+        Route::post('/auth/logout', [AuthTokenController::class, 'logout']);
+    });
 });
