@@ -5,12 +5,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\Soap\LibrarySoapController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes - SIPUS-Del
 |--------------------------------------------------------------------------
 */
+
+// SOAP Web Services (Legacy Integration)
+Route::get('/soap/sipus.wsdl', [LibrarySoapController::class, 'wsdl']);
+Route::post('/soap/sipus', [LibrarySoapController::class, 'handle']);
 
 Route::get('/', function () {
     return redirect()->route('buku.index');
