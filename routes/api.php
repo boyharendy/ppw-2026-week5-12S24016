@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function () {
 
     // Katalog Buku Publik
     Route::get('/bukus', [BukuApiController::class, 'index']);
+    Route::get('/bukus/{id}/referensi-eksternal', [BukuApiController::class, 'referensiEksternal']);
     Route::get('/bukus/{identifier}', [BukuApiController::class, 'show']);
 
     // =========================================================================
